@@ -4,23 +4,9 @@ mod pyrust;
 
 fn main() {
     let program= "
-scope main(){
-    bind num : Int = 0;
-    bind text : Str = 'Hello World!';
-    label loop;
-    text;
-    print(it);
-    num;
-    it+1;
-    num=it;
-    if(num!=5);
-    jump loop;
-    else;
-    class print(){
-        io=
-    }
-    
-}
+bind num = 0;
+bind text = 'Hello World!';
+io=text;
 ";
     compile_run(String::from(program))
 }
