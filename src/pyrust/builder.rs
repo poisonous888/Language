@@ -4,15 +4,17 @@ pub fn build(mut tokens:Vec<Token>)-> ClassPreProcess {
     let mut class_stack:Vec<ClassPreProcess>=vec![ClassPreProcess::new()];
     loop{
         if tokens.is_empty() { break }
-        let mut top =class_stack.remove(class_stack.len()-1);
         let mut cur_statement:Vec<Token>=Vec::new();
         loop{
             if tokens.is_empty() { break }
             let cur_token=tokens.remove(0);
+            let loc=class_stack.len()-1;
+            let mut top:&mut ClassPreProcess=class_stack.get_mut(loc).expect("[ERROR] empty class stack");
+            
             match cur_token {
                 InsEnd=>{ break }
                 ScopeInc=>{
-                    push_statement(cur_statement,&mut top);
+                    push_statement(cur_statement,top);
 
                     class_stack.push(ClassPreProcess::new());
                     break
@@ -34,7 +36,7 @@ pub fn build(mut tokens:Vec<Token>)-> ClassPreProcess {
                 _=>{cur_statement.push(cur_token)}
             }
         }
-        class_stack.push(top)
+        
     };
     if class_stack.len()>1 {
         panic!("[ERROR] too many open brackets")

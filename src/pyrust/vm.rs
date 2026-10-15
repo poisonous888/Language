@@ -1,28 +1,34 @@
+use std::process::exit;
 use crate::pyrust::compiler::*;
 
 pub fn run(main: Class) {
     let root=Scope::new(main);
     let mut scope_stack =vec![root];
     loop{
-        scope_stack=step(scope_stack);
+        step(&mut scope_stack);
     }
     
     
 }
-fn step(mut stack:Vec<Scope>)->Vec<Scope>{
-    let mut top =stack.remove(stack.len()-1);
+fn step(stack:&mut Vec<Scope>){
+    let loc=stack.len();
+    if loc==0{exit(0)}
+    let top_expect =stack.get_mut(loc-1);
+    let top=match top_expect {
+        Some(e) => {e}
+        None => { exit(0) }
+    };
     let cur_ins = top.clazz.instructions.get(top.ins_ptr);
     match cur_ins {
         Some(e) => {
             exec(e)
         }
-        None => {
-            return stack
+        None =>{
+            stack.pop();
+            return
         }
     }
     top.ins_ptr+=1;
-    stack.push(top);
-    stack
 }
 fn exec(instruction:&Instruction){
     println!("{:?}",instruction)

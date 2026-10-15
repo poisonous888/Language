@@ -2,16 +2,6 @@ use crate::pyrust::parser::MatchType::*;
 use crate::pyrust::parser::Number::*;
 use crate::pyrust::parser::Opperator::*;
 use crate::pyrust::parser::Token::*;
-pub fn parse(string: String){
-    let mut test=tokenize(string);
-    println!();
-    println!("PRINTING");
-    println!();
-    loop{
-        if test.len()==0 { break; }
-        print(&test.remove(0));
-    }
-}
 pub fn tokenize(string: String)->Vec<Token>{
     let mut chars =string.chars();
     let mut output:Vec<Token>=vec![];
@@ -173,6 +163,7 @@ fn push_token(token:String, stack: &mut Vec<Token>) ->String{
     else{stack.push(Identifier(token))}
     String::new()
 }
+#[derive(Debug)]
 pub enum Token{
     Identifier(String), //anything that can have a name
     Assign,
@@ -190,10 +181,12 @@ pub enum Token{
     Label,Jump, //standard assembly shenanigans
     If,Else,Catch, //control flow but without the brackets
 }
+#[derive(Debug)]
 pub enum Number{
     Int(i32),
     Double(f64)
 }
+#[derive(Debug)]
 pub enum Opperator{
     Not,
     Equal,
@@ -212,53 +205,4 @@ fn parse_number(str:String)->Number{
     }
     let out:i32=str.parse().expect(&*("Invalid Integer - ".to_owned()+&*str));
     Int(out)
-}
-
-fn print(cur:&Token){
-    let out=match cur {
-        Identifier(e) => { "identifier - ".to_owned()+&*e }
-        StringLit(e) => {"string literal - ".to_string()+ &*e }
-        InsEnd => {";".to_owned()}
-        Bind => {"bind".to_owned()}
-        Return => {"scope".to_owned()}
-        IntoScope => {"into scope".to_owned()}
-        ScopeInc => {"{".to_owned()}
-        ScopeDec => {"}".to_owned()}
-        ArgStart => {"(".to_owned()}
-        ArgEnd => {")".to_owned()}
-        Label => {"label".to_owned()}
-        Jump => {"jump".to_owned()}
-        If => {"if".to_owned()}
-        Else => {"else".to_owned()}
-        Catch => {"catch".to_owned()}
-        NumLit(e) => {match e {
-            Int(e) => { "int literal - ".to_owned()+ &*e.to_string() }
-            Double(e) => { "double literal - ".to_owned()+ &*e.to_string() }
-        }}
-        Assign => {"assign".to_string()}
-        Oppr(e)=>{
-            match e {
-                Not => {"!".to_string()}
-                Equal => {"==".to_string()}
-                NotEqual => {"!=".to_string()}
-                Greater => {">".to_string()}
-                Less => {"<".to_string()}
-                GreaterEq => {">=".to_string()}
-                LessEq => {"<=>".to_string()}
-                Inc => {"++".to_string()}
-                Dec => {"--".to_string()}
-                Add => {"+".to_string()}
-                Sub => {"-".to_string()}
-                Mult => {"*".to_string()}
-                Div => {"/".to_string()}
-                SetAdd => {"+=".to_string()}
-                SetSub => {"-=".to_string()}
-                SetMult => {"*=".to_string()}
-                SetDiv => {"/=".to_string()}
-                Mod => {"%".to_string()}
-            }
-        }
-        Scope => {"scope".to_string()}
-    };
-    println!("{}", out);
 }

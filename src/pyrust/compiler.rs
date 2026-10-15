@@ -3,9 +3,11 @@ use crate::pyrust::compiler::Instruction::*;
 use crate::pyrust::parser::*;
 use crate::pyrust::parser::Token::*;
 pub fn compile(pre:ClassPreProcess)->Class{
-    loop{
-    
+    let mut new =Class::new();
+    for thing in pre.sub_classes{
+        new.sub_classes.push(compile(thing))
     };
+    new
 }
 fn get_cur_inst(statement:Vec<Token>)->Vec<Instruction>{
     let mut instruction_set:Vec<Instruction>=Vec::new();
