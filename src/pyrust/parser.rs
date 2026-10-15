@@ -12,7 +12,7 @@ pub fn parse(string: String){
         print(&test.remove(0));
     }
 }
-fn tokenize(string: String)->Vec<Token>{
+pub fn tokenize(string: String)->Vec<Token>{
     let mut chars =string.chars();
     let mut output:Vec<Token>=vec![];
     let mut cur_token=String::new();
@@ -98,7 +98,7 @@ fn tokenize(string: String)->Vec<Token>{
             }
             Opp => {
                 match cur {
-                    '='|'+'|'-'=>{
+                    '='|'+'|'-'|'/'=>{
                         cur_token.push(cur);
                     }
                     _=>{
@@ -111,7 +111,12 @@ fn tokenize(string: String)->Vec<Token>{
                         cur_token=String::new();
                         continue
                     }
-                    "="=>{Assign}
+                    "="=>{
+                        output.push(Assign);
+                        cur_token=String::new();
+                        state=Normal;
+                        continue
+                    }
                     "=="=>{Equal}
                     ">"=>{Greater}
                     "<"=>{Less}
@@ -120,7 +125,7 @@ fn tokenize(string: String)->Vec<Token>{
                     "!"=>{Not}
                     "!="=>{NotEqual}
                     "++"=>{Inc}
-                    "--"=>{Sub}
+                    "--"=>{Dec}
                     "+"=>{Add}
                     "-"=>{Sub}
                     "*"=>{Mult}
@@ -138,7 +143,7 @@ fn tokenize(string: String)->Vec<Token>{
             }
             Comment => {
                 match cur {
-                    '/'|'\n'=> { state=Normal }
+                    '\n'=> { state=Normal }
                     _=>{}
                 }
             }
@@ -159,6 +164,8 @@ fn push_token(token:String, stack: &mut Vec<Token>) ->String{
     if token.is_empty() {}
     else if token=="bind"{stack.push(Bind)}
     else if token=="label"{stack.push(Label)}
+    else if token=="scope"{stack.push(Scope)}
+    else if token=="return"{stack.push(Return)}
     else if token=="jump"{stack.push(Jump)}
     else if token=="if"{stack.push(If)}
     else if token=="else"{stack.push(Else)}
@@ -166,27 +173,28 @@ fn push_token(token:String, stack: &mut Vec<Token>) ->String{
     else{stack.push(Identifier(token))}
     String::new()
 }
-enum Token{
+pub enum Token{
     Identifier(String), //anything that can have a name
+    Assign,
     StringLit(String), //""
     NumLit(Number),
     Oppr(Opperator),
     InsEnd, //;
     IntoScope, //.
     
-    Bind,Class,Scope, //bind is variables, class is a java class, scope is a kotlin object
-    ScopeInc,ScopeDec, //scope and class things
+    Bind, //bind is variables
+    Scope,ScopeInc,ScopeDec,
+    Return, //scope and class things
     ArgStart,ArgEnd, //parentheses
     
     Label,Jump, //standard assembly shenanigans
     If,Else,Catch, //control flow but without the brackets
 }
-enum Number{
+pub enum Number{
     Int(i32),
     Double(f64)
 }
-enum Opperator{
-    Assign,
+pub enum Opperator{
     Not,
     Equal,
     NotEqual,
@@ -212,8 +220,7 @@ fn print(cur:&Token){
         StringLit(e) => {"string literal - ".to_string()+ &*e }
         InsEnd => {";".to_owned()}
         Bind => {"bind".to_owned()}
-        Class => {"class".to_owned()}
-        Scope => {"scope".to_owned()}
+        Return => {"scope".to_owned()}
         IntoScope => {"into scope".to_owned()}
         ScopeInc => {"{".to_owned()}
         ScopeDec => {"}".to_owned()}
@@ -228,9 +235,9 @@ fn print(cur:&Token){
             Int(e) => { "int literal - ".to_owned()+ &*e.to_string() }
             Double(e) => { "double literal - ".to_owned()+ &*e.to_string() }
         }}
+        Assign => {"assign".to_string()}
         Oppr(e)=>{
             match e {
-                Assign => {"assign".to_string()}
                 Not => {"!".to_string()}
                 Equal => {"==".to_string()}
                 NotEqual => {"!=".to_string()}
@@ -251,6 +258,7 @@ fn print(cur:&Token){
                 Mod => {"%".to_string()}
             }
         }
+        Scope => {"scope".to_string()}
     };
     println!("{}", out);
 }
