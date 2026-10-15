@@ -153,6 +153,8 @@ enum MatchType{
 }
 fn push_token(token:String, stack: &mut Vec<Token>) ->String{
     if token.is_empty() {}
+    else if token=="true"{stack.push(BoolLit(true))}
+    else if token=="false"{stack.push(BoolLit(false))}
     else if token=="bind"{stack.push(Bind)}
     else if token=="label"{stack.push(Label)}
     else if token=="return"{stack.push(Return)}
@@ -169,6 +171,7 @@ pub enum Token{
     Assign,
     StringLit(String), //""
     NumLit(Number),
+    BoolLit(bool),
     Oppr(Opperator),
     InsEnd, //;
     IntoScope, //.
