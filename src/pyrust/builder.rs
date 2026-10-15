@@ -1,6 +1,6 @@
 use crate::pyrust::parser::*;
 use crate::pyrust::parser::Token::*;
-pub fn build(mut tokens:Vec<Token>)-> ClassPreProcess {
+pub fn build(mut tokens:Vec<Token>,debug:bool)-> ClassPreProcess {
     let mut class_stack:Vec<ClassPreProcess>=vec![ClassPreProcess::new()];
     loop{
         if tokens.is_empty() { break }
@@ -12,14 +12,19 @@ pub fn build(mut tokens:Vec<Token>)-> ClassPreProcess {
             let mut top:&mut ClassPreProcess=class_stack.get_mut(loc).expect("[ERROR] empty class stack");
             
             match cur_token {
-                InsEnd=>{ break }
-                ScopeInc=>{
+                InsEnd=>{
+                    if debug{println!("End Instruction: {:?}", cur_statement)}
                     push_statement(cur_statement,top);
-
+                    break
+                }
+                ScopeInc=>{
+                    if debug{println!("Increase scope")}
+                    push_statement(cur_statement,top);
                     class_stack.push(ClassPreProcess::new());
                     break
                 }
                 ScopeDec=>{
+                    if debug { println!("Decrease scope"); }
                     push_statement(cur_statement,&mut top);
                     
                     if class_stack.len()<2 {
@@ -29,11 +34,14 @@ pub fn build(mut tokens:Vec<Token>)-> ClassPreProcess {
                     let mut top =class_stack.remove(class_stack.len()-1);
                     top.sub_classes.push(to_add);
                     let num=top.sub_classes.len()-1;
+                    top.instructions.last_mut().unwrap().push(Scope(num as i32));
                     class_stack.push(top);
-                    
                     break
                 }
-                _=>{cur_statement.push(cur_token)}
+                _=>{
+                    if debug { println!("{:?}", cur_statement); }
+                    cur_statement.push(cur_token);
+                }
             }
         }
         

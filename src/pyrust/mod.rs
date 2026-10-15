@@ -8,13 +8,13 @@ mod parser;
 mod builder;
 mod compiler;
 
-pub fn compile_run(program:String){
+pub fn compile_run(program:String,debug:bool){
     println!("[compiler] lexing...");
-    let tokens=tokenize(program);
+    let tokens=tokenize(program,debug);
     println!("[compiler] building...");
-    let pre_classes=build(tokens);
+    let pre_classes=build(tokens,debug);
     println!("[compiler] compiling...");
-    let class =compile(pre_classes);
+    let class =compile(pre_classes,debug);
     println!("[compiler] running...");
     run(class);
 }

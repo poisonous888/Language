@@ -2,7 +2,7 @@ use crate::pyrust::parser::MatchType::*;
 use crate::pyrust::parser::Number::*;
 use crate::pyrust::parser::Opperator::*;
 use crate::pyrust::parser::Token::*;
-pub fn tokenize(string: String)->Vec<Token>{
+pub fn tokenize(string: String,debug:bool)->Vec<Token>{
     let mut chars =string.chars();
     let mut output:Vec<Token>=vec![];
     let mut cur_token=String::new();
@@ -138,8 +138,9 @@ pub fn tokenize(string: String)->Vec<Token>{
                 }
             }
         }
-        println!("{:?} - {}",state, cur_token)
+        if debug{println!("{:?} - {}", state, cur_token)}
     }
+    if debug{println!("Parsed: {:?}", output)}
     output
 }
 #[derive(Debug)]
@@ -154,7 +155,6 @@ fn push_token(token:String, stack: &mut Vec<Token>) ->String{
     if token.is_empty() {}
     else if token=="bind"{stack.push(Bind)}
     else if token=="label"{stack.push(Label)}
-    else if token=="scope"{stack.push(Scope)}
     else if token=="return"{stack.push(Return)}
     else if token=="jump"{stack.push(Jump)}
     else if token=="if"{stack.push(If)}
@@ -163,7 +163,7 @@ fn push_token(token:String, stack: &mut Vec<Token>) ->String{
     else{stack.push(Identifier(token))}
     String::new()
 }
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Token{
     Identifier(String), //anything that can have a name
     Assign,
@@ -174,19 +174,19 @@ pub enum Token{
     IntoScope, //.
     
     Bind, //bind is variables
-    Scope,ScopeInc,ScopeDec,
+    Scope(i32),ScopeInc,ScopeDec,
     Return, //scope and class things
-    ArgStart,ArgEnd, //parentheses
+    Arg(Vec<String>),ArgStart,ArgEnd, //parentheses
     
     Label,Jump, //standard assembly shenanigans
     If,Else,Catch, //control flow but without the brackets
 }
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Number{
     Int(i32),
     Double(f64)
 }
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Opperator{
     Not,
     Equal,
